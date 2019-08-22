@@ -7,7 +7,31 @@ import 'model/themes.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  _getTheme(String theme) {
+    switch (theme) {
+      case 'red':
+        return CustomTheme.redTheme();
+        break;
+      case 'yellow':
+        return CustomTheme.yellowTheme();
+        break;
+      case 'blue':
+        return CustomTheme.blueTheme();
+        break;
+      case 'indigo':
+        return CustomTheme.indigoTheme();
+        break;
+      case 'green':
+        return CustomTheme.greenTheme();
+        break;
+      case 'black':
+        return CustomTheme.blackTheme();
+        break;
+      default:
+        return CustomTheme.blackTheme();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return new DynamicTheme(
@@ -23,9 +47,3 @@ class MyApp extends StatelessWidget {
         });
   }
 }
-
-ThemeData black() {
-  return new ThemeData.dark();
-}
-
-

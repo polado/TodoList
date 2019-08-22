@@ -25,22 +25,16 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
     super.initState();
   }
 
-//  onelement_selected(int index){
-//    setState((){
-//      indexList[index].isselected=!indexList[index].isselected;
-//    });
-  bool iss = false;
-
   Widget _getDays2(BuildContext context, int index) {
     return new DayWidget(
       index: index,
       text: days[index],
-      isSelected: indexList[index].isselected,
+      isSelected: indexList[index].isSelected,
       callback: () {
-        print('hello $selected ${indexList[index].isselected}');
-        if (!selected || indexList[index].isselected)
+        print('hello $selected ${indexList[index].isSelected}');
+        if (!selected || indexList[index].isSelected)
           setState(() {
-            indexList[index].isselected = !indexList[index].isselected;
+            indexList[index].isSelected = !indexList[index].isSelected;
             selected = !selected;
             selectedIndex = index;
           });
@@ -51,7 +45,7 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
   @override
   Widget build(BuildContext context) {
     for (var i = 0; i < 7; i++) {
-      indexList.add(Element(isselected: false));
+      indexList.add(Element(isSelected: false));
     }
 
     return new Scaffold(
@@ -97,7 +91,7 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
                 onPressed: () {
                   if (selected) {
                     print("pressed");
-//                    Navigator.of(context).pop(days[selectedIndex]);
+//                    Navigator.of(context).pop('Sunday');
                     Navigator.pop(context);
                   }
                 },
@@ -108,6 +102,13 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
       ),
     );
   }
+}
+
+enum DialogDemoAction {
+  cancel,
+  discard,
+  disagree,
+  agree,
 }
 
 class DayWidget extends StatefulWidget {
@@ -160,7 +161,7 @@ class _DayWidgetState extends State<DayWidget> {
 }
 
 class Element {
-  bool isselected;
+  bool isSelected;
 
-  Element({this.isselected});
+  Element({this.isSelected});
 }

@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../database_helpers.dart';
+
 class TaskWidget extends StatefulWidget {
-  final String taskName, description;
-  final DateTime taskDate;
+  final Task task;
   final bool longPressEnabled;
-  final VoidCallback callback;
+  final VoidCallback callback, dissmiss;
   final bool isSelected;
   final int index;
 
-  TaskWidget(
-      {this.taskName,
-      this.description,
-      this.taskDate,
-      this.longPressEnabled,
+  TaskWidget({this.longPressEnabled,
       this.callback,
       this.isSelected,
-      this.index});
+    this.index,
+    this.task,
+    this.dissmiss});
 
   @override
   _TaskWidgetState createState() => _TaskWidgetState();
@@ -29,7 +28,17 @@ class _TaskWidgetState extends State<TaskWidget> {
     return new GestureDetector(
       onLongPress: () => widget.callback(),
       onTap: () {
+        print('tapppp ${widget.longPressEnabled}');
         if (widget.longPressEnabled) widget.callback();
+      },
+      onHorizontalDragEnd: (details) {
+        print('drag ended');
+        widget.dissmiss();
+      },
+      onPanUpdate: (details) {
+        if (details.delta.dx > 0) {
+          widget.dissmiss();
+        }
       },
       child: Card(
         elevation: 0,
@@ -41,12 +50,16 @@ class _TaskWidgetState extends State<TaskWidget> {
             Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                widget.taskName,
+                widget.task.taskName,
                 style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.black,
-                    fontFamily: 'Tomica',
-                    fontWeight: FontWeight.normal),
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontFamily: 'Tomica',
+                  fontWeight: FontWeight.normal,
+                  decoration: widget.task.isActive
+                      ? TextDecoration.none
+                      : TextDecoration.lineThrough,
+                ),
               ),
             ),
             new Spacer(),
@@ -62,54 +75,6 @@ class _TaskWidgetState extends State<TaskWidget> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class TaskWidget2 extends StatelessWidget {
-  String taskName, description;
-  DateTime taskDate;
-
-  TaskWidget2({this.taskName, this.description, this.taskDate});
-
-  bool visibilityFlag = false;
-
-  void changeVisibility() {
-    visibilityFlag = !visibilityFlag;
-  }
-
-  Widget visibility = Visibility(
-    child: Radio(
-      value: 1,
-    ),
-    visible: false,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: new GestureDetector(
-          onLongPress: () => "long press $taskName",
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  taskName,
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.black,
-                      fontFamily: 'Tomica',
-                      fontWeight: FontWeight.normal),
-                ),
-                new Spacer(),
-                visibility
-              ],
-            ),
-          )),
     );
   }
 }

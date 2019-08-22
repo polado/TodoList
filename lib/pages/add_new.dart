@@ -3,21 +3,49 @@ import 'package:page_transition/page_transition.dart';
 import 'package:todo_list/pages/tasks.dart';
 import 'package:todo_list/widgets/add_task_dialog.dart';
 
+import '../database_helpers.dart';
+
 class AddNewView extends StatefulWidget {
+  final bool typeNew;
+  final Task task;
+
+  AddNewView({Key key, this.typeNew, this.task}) : super(key: key);
+
   @override
   _AddNewViewState createState() => _AddNewViewState();
 }
 
 class _AddNewViewState extends State<AddNewView> {
-  String taskDay = "Tab to choose a day";
-  Text buttonText = Text(
-    "Tab to choose a day",
-    style: TextStyle(
-        fontSize: 20,
-        color: Colors.black87,
-        fontFamily: 'Tomica',
-        fontWeight: FontWeight.normal),
-  );
+  String taskDay = "Tab to choose a day",
+      title,
+      saveButtonText;
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+
+  _save() async {
+    Task task = Task();
+    if (widget.typeNew) {
+      task.taskName = nameController.text;
+      task.description = descriptionController.text;
+      task.taskDate = 'Sunday';
+      task.isActive = true;
+      DatabaseHelper helper = DatabaseHelper.instance;
+      int id = await helper.insert(task);
+      print('inserted row: $id');
+    } else {
+      task = widget.task;
+      task.taskName = nameController.text;
+      task.description = descriptionController.text;
+      task.taskDate = 'Sunday';
+      task.isActive = true;
+      DatabaseHelper helper = DatabaseHelper.instance;
+      int res = await helper.updateInActive(task);
+      print('updated row: $res');
+    }
+
+    navigate();
+  }
 
   void navigate() {
     Navigator.pushReplacement(
@@ -32,26 +60,36 @@ class _AddNewViewState extends State<AddNewView> {
 //        MaterialPageRoute(
 //            builder: (context) => new AddTaskDialogWidget(),
 //            fullscreenDialog: true));
-    Text txt = await Navigator.of(context).push(new MaterialPageRoute<Null>(
+    String txt = await Navigator.of(context).push(new MaterialPageRoute<Null>(
       builder: (BuildContext context) => new AddTaskDialogWidget(),
       fullscreenDialog: true,
     ));
 
     if (txt != null)
       setState(() {
-        buttonText = txt;
+        taskDay = txt;
       });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.typeNew) {
+      title = 'Add New';
+      saveButtonText = 'Add the task +';
+    } else {
+      title = 'Edit';
+      saveButtonText = 'Save the task +';
+      nameController.text = widget.task.taskName;
+      descriptionController.text = widget.task.description;
+    }
+
     Widget appbar = AppBar(
       leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             navigate();
           }),
-      title: Text("Add New"),
+      title: Text(title),
     );
 
     Widget body = Container(
@@ -79,6 +117,7 @@ class _AddNewViewState extends State<AddNewView> {
                           borderRadius: BorderRadius.circular(10)),
                       child: TextField(
                         style: TextStyle(color: Colors.black),
+                        controller: nameController,
                         decoration: InputDecoration(
                             hintStyle: TextStyle(
                               color: Colors.black54,
@@ -108,6 +147,7 @@ class _AddNewViewState extends State<AddNewView> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       child: TextField(
+                        controller: descriptionController,
                         minLines: 5,
                         maxLines: 8,
                         style: TextStyle(color: Colors.black),
@@ -119,7 +159,7 @@ class _AddNewViewState extends State<AddNewView> {
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10)),
                             hintText:
-                                "I should eat before medicine, and don't have to wait after eating."),
+                            "I should eat before medicine, and don't have to wait after eating."),
                       ),
                     ),
                   ],
@@ -144,7 +184,14 @@ class _AddNewViewState extends State<AddNewView> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         padding: EdgeInsets.all(16),
-                        child: buttonText,
+                        child: Text(
+                          taskDay,
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.black87,
+                              fontFamily: 'Tomica',
+                              fontWeight: FontWeight.normal),
+                        ),
                         onPressed: () {
                           _openAddEntryDialog();
                         },
@@ -166,7 +213,7 @@ class _AddNewViewState extends State<AddNewView> {
                   highlightColor: Colors.transparent,
                   padding: EdgeInsets.all(24),
                   child: Text(
-                    "Add the task +",
+                    saveButtonText,
                     style: TextStyle(
                         fontSize: 24,
                         color: Colors.grey,
@@ -174,7 +221,10 @@ class _AddNewViewState extends State<AddNewView> {
                         fontWeight: FontWeight.normal),
                   ),
                   onPressed: () {
-                    navigate();
+                    (nameController.text.isNotEmpty &&
+                        descriptionController.text.isNotEmpty)
+                        ? _save()
+                        : print('No Data');
                   },
                 ),
               ),

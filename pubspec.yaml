@@ -25,6 +25,10 @@ dependencies:
   cupertino_icons: ^0.1.2
   page_transition: ^1.1.4
   dynamic_theme: ^1.0.1
+  path_provider: ^0.4.1
+  sqflite: ^1.0.0
+  shared_preferences: ^0.5.3+4
+  intl: ^0.15.8
 
 dev_dependencies:
   flutter_test:
@@ -59,17 +63,17 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-        - family: Tomica
-          fonts:
-            - asset: assets/fonts/Tomica-Light.ttf
-#              - asset: assets/fonts/Tomica-Thin.ttf
-#            - asset: assets/fonts/Tomica.ttf
+    - family: Tomica
+      fonts:
+        - asset: assets/fonts/Tomica-Light.ttf
+    #              - asset: assets/fonts/Tomica-Thin.ttf
+    #            - asset: assets/fonts/Tomica.ttf
 
-        - family: Dosis
-          fonts:
-            - asset: assets/fonts/Dosis_Regular.ttf
-            - asset: assets/fonts/Dosis_Bold.ttf
-#          weight: 700
+    - family: Dosis
+      fonts:
+        - asset: assets/fonts/Dosis_Regular.ttf
+        - asset: assets/fonts/Dosis_Bold.ttf
+  #          weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

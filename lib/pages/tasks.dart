@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:todo_list/widgets/done_tasks_widget.dart';
 import 'package:todo_list/widgets/task_widget.dart';
 
+import '../database_helpers.dart';
 import 'add_new.dart';
 import 'home.dart';
 
@@ -15,11 +16,14 @@ class _TasksViewState extends State<TasksView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   bool longPressFlag = false;
-  List<Element> indexList = new List();
+  List<Element> indexListActive = new List();
+  List<Element> indexListInActive = new List();
   List<int> clicked = new List();
 
   Widget icon = Icon(Icons.view_module);
   bool iconSwitch = true;
+
+  bool isTasksLoaded = false;
 
   List<String> tasks = [
     "Feed the Cat",
@@ -29,9 +33,130 @@ class _TasksViewState extends State<TasksView> {
     "Wash Your Cloth"
   ];
 
+  List<Task> activeTasks, inActiveTasks;
+  List<Task> list2, list;
+
+  _readActiveTasks() async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    list2 = await helper.queryActiveTasks();
+    if (list2 == null) {
+      print('read rows: empty');
+    } else {
+      list2.forEach(
+              (t) => print('read row ${t.id} ${t.taskName} ${t.isActive}'));
+
+      setState(() {
+        indexListActive.clear();
+        for (var i = 0; i < activeTasks.length; i++) {
+          indexListActive.add(Element(isSelected: false));
+        }
+        activeTasks = list2;
+      });
+    }
+  }
+
+  _readInActiveTasks() async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    list = await helper.queryInActiveTasks();
+    if (list == null) {
+      print('read rows: empty');
+    } else {
+      list.forEach(
+              (t) => print('read row ${t.id} ${t.taskName} ${t.isActive}'));
+
+      setState(() {
+        indexListInActive.clear();
+        for (var i = 0; i < inActiveTasks.length; i++) {
+          indexListInActive.add(Element(isSelected: false));
+        }
+        inActiveTasks = list;
+      });
+    }
+  }
+
+  _updateActiveTask(Task task) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    int res = await helper.updateActive(task);
+    if (res == 1)
+      setState(() {
+        activeTasks.remove(task);
+
+        indexListActive.clear();
+        for (var i = 0; i < activeTasks.length; i++) {
+          indexListActive.add(Element(isSelected: false));
+        }
+
+        clearAll();
+
+        _readInActiveTasks();
+      });
+  }
+
+  _updateInActiveTask(Task task) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    int res = await helper.updateInActive(task);
+    if (res == 1)
+      setState(() {
+        inActiveTasks.remove(task);
+        print(indexListInActive.length);
+
+        indexListInActive.clear();
+        for (var i = 0; i < inActiveTasks.length; i++) {
+          indexListInActive.add(Element(isSelected: false));
+        }
+        print(indexListInActive.length);
+
+        clearAll();
+
+        _readActiveTasks();
+      });
+  }
+
+  _deleteTask(int id) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    int res = await helper.delete(id);
+    if (res == 1)
+      setState(() {
+        Task tt;
+        activeTasks.forEach((t) {
+          if (t.id == id) tt = t;
+        });
+
+        activeTasks.remove(tt);
+
+        indexListActive.clear();
+        for (var i = 0; i < activeTasks.length; i++) {
+          indexListActive.add(Element(isSelected: false));
+        }
+
+        clearAll();
+      });
+  }
+
+  _deleteTasks(List<int> ids) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    int res = await helper.deleteMulti(ids);
+    if (res > 1)
+      setState(() {
+        List<Task> lt = new List<Task>();
+        activeTasks.forEach((t) {
+          if (ids.contains(t.id)) lt.add(t);
+        });
+
+        lt.forEach((t) => activeTasks.remove(t));
+
+        indexListActive.clear();
+        for (var i = 0; i < activeTasks.length; i++) {
+          indexListActive.add(Element(isSelected: false));
+        }
+
+        clearAll();
+      });
+  }
+
   onElementSelected(int index) {
     setState(() {
-      indexList[index].isSelected = !indexList[index].isSelected;
+      indexListActive[index].isSelected = !indexListActive[index].isSelected;
     });
   }
 
@@ -44,25 +169,27 @@ class _TasksViewState extends State<TasksView> {
         longPressFlag = true;
       }
     });
+    print('longpressflag $longPressFlag');
   }
 
   void clearAll() {
     setState(() {
       longPressFlag = false;
       clicked.clear();
-      for (int i = 0; i < indexList.length; i++) {
-        indexList[i].isSelected = false;
+      for (int i = 0; i < indexListActive.length; i++) {
+        indexListActive[i].isSelected = false;
       }
     });
   }
 
-  Widget _getTaskWidget(BuildContext context, int index) {
+  Widget _getActiveTaskWidget(BuildContext context, int index) {
     return new TaskWidget(
       index: index,
-      taskName: tasks[index],
-      isSelected: indexList[index].isSelected,
+      task: activeTasks[index],
+      isSelected: indexListActive[index].isSelected,
       longPressEnabled: longPressFlag,
       callback: () {
+        print('callback');
         onElementSelected(index);
         if (clicked.contains(index)) {
           clicked.remove(index);
@@ -72,16 +199,52 @@ class _TasksViewState extends State<TasksView> {
 
         longPress();
       },
+      dissmiss: () {
+        print('index $index ${activeTasks[index].taskName}');
+        _updateActiveTask(activeTasks[index]);
+      },
+    );
+  }
+
+  Widget _getInActiveTaskWidget(BuildContext context, int index) {
+    return new TaskWidget(
+      index: index,
+      task: inActiveTasks[index],
+      isSelected: indexListInActive[index].isSelected,
+      longPressEnabled: false,
+      callback: () {},
+      dissmiss: () {
+        print('index $index ${inActiveTasks[index].taskName}');
+        _updateInActiveTask(inActiveTasks[index]);
+      },
     );
   }
 
   @override
+  void initState() {
+    super.initState();
+    activeTasks = new List<Task>();
+    inActiveTasks = new List<Task>();
+    _readActiveTasks();
+    _readInActiveTasks();
+  }
+
+  Widget tempBody,
+      primeBody = Text(""),
+      body,
+      bottomSheet;
+
+  @override
   Widget build(BuildContext context) {
-    for (var i = 0; i < tasks.length; i++) {
-      indexList.add(Element(isSelected: false));
+    for (var i = 0; i < activeTasks.length; i++) {
+      indexListActive.add(Element(isSelected: false));
     }
 
-    Widget bottomSheet = Container(
+    for (var i = 0; i < inActiveTasks.length; i++) {
+      indexListInActive.add(Element(isSelected: false));
+    }
+
+    bottomSheet = Container(
       color: Colors.black,
       child: Padding(
           padding: EdgeInsets.all(8),
@@ -109,12 +272,14 @@ class _TasksViewState extends State<TasksView> {
                       ),
                     ),
                   ),
-                  DoneTaskWidget(
-                    taskName: "Call my Dad",
-                  ),
-                  DoneTaskWidget(
-                    taskName: "Check my Car Engine",
-                  ),
+                  Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: ListView.builder(
+                          itemBuilder: _getInActiveTaskWidget,
+                          itemCount: inActiveTasks.length,
+                        ),
+                      )),
                 ],
               ),
               Column(
@@ -148,7 +313,7 @@ class _TasksViewState extends State<TasksView> {
       actions: <Widget>[
         Center(
           child: Text(
-            "Sunday >",
+            "${DateFormat('EEEE').format(DateTime.now())} >",
             textScaleFactor: 1.5,
             style: TextStyle(
                 fontSize: 10,
@@ -180,14 +345,14 @@ class _TasksViewState extends State<TasksView> {
       ],
     );
 
-    Widget body = Column(
+    body = Column(
       children: <Widget>[
         Expanded(
             child: Padding(
           padding: EdgeInsets.all(8),
           child: ListView.builder(
-            itemBuilder: _getTaskWidget,
-            itemCount: 5,
+            itemBuilder: _getActiveTaskWidget,
+            itemCount: activeTasks.length,
           ),
         )),
         Padding(
@@ -215,7 +380,9 @@ class _TasksViewState extends State<TasksView> {
                           context,
                           PageTransition(
                               type: PageTransitionType.rightToLeft,
-                              child: AddNewView()));
+                              child: AddNewView(
+                                typeNew: true,
+                              )));
                     },
             ),
           ),
@@ -261,14 +428,31 @@ class _TasksViewState extends State<TasksView> {
                   Visibility(
                     visible: clicked.length <= 1,
                     child: FlatButton(
-                        onPressed: () => clearAll(),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: AddNewView(
+                                    typeNew: false,
+                                    task: activeTasks[clicked.first],
+                                  )));
+                        },
                         child: Text(
                           "Edit",
                           style: TextStyle(fontSize: 18),
                         )),
                   ),
                   FlatButton(
-                      onPressed: () => clearAll(),
+                      onPressed: () {
+                        if (clicked.length == 1)
+                          _deleteTask(activeTasks[clicked.first].id);
+                        else if (clicked.length > 1) {
+                          List<int> ids = new List<int>();
+                          clicked.forEach((i) => ids.add(i));
+                          _deleteTasks(ids);
+                        }
+                      },
                       child: Text(
                         "Delete",
                         style: TextStyle(fontSize: 18),
