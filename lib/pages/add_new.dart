@@ -116,7 +116,9 @@ class _AddNewViewState extends State<AddNewView> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       child: TextField(
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Theme
+                            .of(context)
+                            .primaryColorDark),
                         controller: nameController,
                         decoration: InputDecoration(
                             hintStyle: TextStyle(
@@ -207,7 +209,9 @@ class _AddNewViewState extends State<AddNewView> {
             children: <Widget>[
               Container(
                 width: MediaQuery.of(context).size.width,
-                color: Colors.black,
+                color: Theme
+                    .of(context)
+                    .primaryColorDark,
                 child: FlatButton(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,

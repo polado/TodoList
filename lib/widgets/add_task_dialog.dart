@@ -56,11 +56,15 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
           "Choose Day",
           style: TextStyle(color: Colors.grey),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Theme
+            .of(context)
+            .primaryColorDark,
         brightness: Brightness.dark,
       ),
       body: Container(
-        color: Colors.black,
+        color: Theme
+            .of(context)
+            .primaryColorDark,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,7 +79,9 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
             )),
             Container(
               width: MediaQuery.of(context).size.width,
-              color: Colors.black,
+              color: Theme
+                  .of(context)
+                  .primaryColorDark,
               child: FlatButton(
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
@@ -84,7 +90,9 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
                   "Done",
                   style: TextStyle(
                       fontSize: 24,
-                      color: Colors.grey,
+                      color: Theme
+                          .of(context)
+                          .accentColor,
                       fontFamily: 'Tomica',
                       fontWeight: FontWeight.normal),
                 ),

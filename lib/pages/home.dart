@@ -111,7 +111,9 @@ class _HomeViewState extends State<HomeView> {
           size: 30,
         ),
         Container(
-          color: Colors.black,
+          color: Theme
+              .of(context)
+              .primaryColorDark,
           padding: EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,

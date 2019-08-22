@@ -245,7 +245,9 @@ class _TasksViewState extends State<TasksView> {
     }
 
     bottomSheet = Container(
-      color: Colors.black,
+      color: Theme
+          .of(context)
+          .primaryColorDark,
       child: Padding(
           padding: EdgeInsets.all(8),
           child: Stack(
@@ -257,7 +259,9 @@ class _TasksViewState extends State<TasksView> {
                 children: <Widget>[
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    color: Colors.black,
+                    color: Theme
+                        .of(context)
+                        .primaryColorDark,
                     child: Padding(
                       padding:
                           EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -362,7 +366,9 @@ class _TasksViewState extends State<TasksView> {
             child: OutlineButton(
               disabledBorderColor: Colors.black87,
               disabledTextColor: Colors.black54,
-              textColor: Colors.grey,
+              textColor: Theme
+                  .of(context)
+                  .accentColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               padding: EdgeInsets.all(16),
@@ -392,7 +398,9 @@ class _TasksViewState extends State<TasksView> {
             visible: !longPressFlag,
             child: Container(
               width: MediaQuery.of(context).size.width,
-              color: Colors.black,
+              color: Theme
+                  .of(context)
+                  .primaryColorDark,
               child: InkWell(
                 onTap: () {
                   print("show botttom sheet");
@@ -417,7 +425,9 @@ class _TasksViewState extends State<TasksView> {
           visible: longPressFlag,
           child: Container(
             width: MediaQuery.of(context).size.width,
-            color: Colors.black,
+            color: Theme
+                .of(context)
+                .primaryColorDark,
             child: Padding(
               padding: EdgeInsets.all(4),
               child: Row(
