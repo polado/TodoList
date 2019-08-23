@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:scroll_behavior/scroll_behavior.dart';
 import 'package:todo_list/widgets/task_widget.dart';
 
 import '../database_helpers.dart';
@@ -279,9 +280,12 @@ class _TasksViewState extends State<TasksView> {
                   Expanded(
                       child: Padding(
                         padding: EdgeInsets.all(8),
-                        child: ListView.builder(
-                          itemBuilder: _getInActiveTaskWidget,
-                          itemCount: inActiveTasks.length,
+                        child: ScrollConfiguration(
+                          child: ListView.builder(
+                            itemBuilder: _getInActiveTaskWidget,
+                            itemCount: inActiveTasks.length,
+                          ),
+                          behavior: NoScrollBehavior(),
                         ),
                       )),
                 ],
@@ -366,6 +370,9 @@ class _TasksViewState extends State<TasksView> {
             child: OutlineButton(
               disabledBorderColor: Colors.black87,
               disabledTextColor: Colors.black54,
+              borderSide: BorderSide(color: Theme
+                  .of(context)
+                  .accentColor),
               textColor: Theme
                   .of(context)
                   .accentColor,
@@ -459,7 +466,7 @@ class _TasksViewState extends State<TasksView> {
                           _deleteTask(activeTasks[clicked.first].id);
                         else if (clicked.length > 1) {
                           List<int> ids = new List<int>();
-                          clicked.forEach((i) => ids.add(i));
+                          clicked.forEach((i) => ids.add(activeTasks[i].id));
                           _deleteTasks(ids);
                         }
                       },

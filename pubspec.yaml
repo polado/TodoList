@@ -29,6 +29,7 @@ dependencies:
   sqflite: ^1.0.0
   shared_preferences: ^0.5.3+4
   intl: ^0.15.8
+  scroll_behavior: ^0.0.1
 
 dev_dependencies:
   flutter_test:
