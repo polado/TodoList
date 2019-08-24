@@ -39,6 +39,11 @@ class Task {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return '$taskName $description $taskDate';
+  }
 }
 
 class DatabaseHelper {

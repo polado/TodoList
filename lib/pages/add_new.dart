@@ -17,13 +17,14 @@ class AddNewView extends StatefulWidget {
 }
 
 class _AddNewViewState extends State<AddNewView> {
-  String taskDay = "Tab to choose a day",
-      title,
-      saveButtonText;
+  String title,
+      saveButtonText,
+      taskDay = "Tab to choose a day";
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController dayController = TextEditingController();
+  TextEditingController dayController =
+  TextEditingController(text: 'Tab to choose a day');
 
   _save() async {
     Task task = Task();
@@ -41,6 +42,7 @@ class _AddNewViewState extends State<AddNewView> {
       task.description = descriptionController.text;
       task.taskDate = dayController.text;
       task.isActive = true;
+      print(task);
       DatabaseHelper helper = DatabaseHelper.instance;
       int res = await helper.updateInActive(task);
       print('updated row: $res');
@@ -62,29 +64,36 @@ class _AddNewViewState extends State<AddNewView> {
 //        MaterialPageRoute(
 //            builder: (context) => new AddTaskDialogWidget(),
 //            fullscreenDialog: true));
-    String txt = await Navigator.of(context).push(new MaterialPageRoute<Null>(
+    await Navigator.of(context).push(new MaterialPageRoute<Null>(
       builder: (BuildContext context) => new AddTaskDialogWidget(),
       fullscreenDialog: true,
     ));
 
-    if (txt != null)
-      setState(() {
-        taskDay = txt;
-      });
+//    if (txt != null)
+//      setState(() {
+//        taskDay = txt;
+//      });
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     if (widget.typeNew) {
       title = 'Add New';
       saveButtonText = 'Add the task +';
     } else {
       title = 'Edit';
-      taskDay = widget.task.taskDate;
       saveButtonText = 'Save the task +';
+      dayController.text = widget.task.taskDate;
       nameController.text = widget.task.taskName;
       descriptionController.text = widget.task.description;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
 
     Widget appbar = AppBar(
       leading: IconButton(
@@ -191,7 +200,7 @@ class _AddNewViewState extends State<AddNewView> {
                             borderRadius: BorderRadius.circular(10)),
                         padding: EdgeInsets.all(16),
                         child: Text(
-                          taskDay,
+                          dayController.text,
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.black87,
@@ -229,9 +238,9 @@ class _AddNewViewState extends State<AddNewView> {
                         fontWeight: FontWeight.normal),
                   ),
                   onPressed: () {
+                    print(dayController.text);
                     (nameController.text.isNotEmpty &&
-                        descriptionController.text.isNotEmpty &&
-                        dayController.text.isNotEmpty)
+                        descriptionController.text.isNotEmpty)
                         ? _save()
                         : print('No Data');
                   },
@@ -253,9 +262,12 @@ class _AddNewViewState extends State<AddNewView> {
     await _openAddEntryDialog();
     var sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
-      taskDay = sharedPreferences.getString('Day');
+      print(sharedPreferences.getString('Day'));
+//      taskDay = sharedPreferences.getString('Day');
       dayController.text = sharedPreferences.getString('Day');
+//      if (!widget.typeNew) widget.task.taskDate = dayController.text;
       sharedPreferences.remove('Day');
     });
+    print('getday ' + dayController.text);
   }
 }

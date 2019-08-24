@@ -99,7 +99,7 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
                 ),
                 onPressed: () {
                   if (selected) {
-                    print("pressed");
+                    print("pressed " + days[selectedIndex]);
 //                    Navigator.of(context).pop('Sunday');
                     saveDay(days[selectedIndex]);
                   }
