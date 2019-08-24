@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddTaskDialogWidget extends StatefulWidget {
   @override
@@ -100,7 +101,7 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
                   if (selected) {
                     print("pressed");
 //                    Navigator.of(context).pop('Sunday');
-                    Navigator.pop(context);
+                    saveDay(days[selectedIndex]);
                   }
                 },
               ),
@@ -109,6 +110,14 @@ class _AddTaskDialogWidgetState extends State<AddTaskDialogWidget> {
         ),
       ),
     );
+  }
+
+  saveDay(String day) async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      sharedPreferences.setString('Day', day);
+      Navigator.pop(context);
+    });
   }
 }
 

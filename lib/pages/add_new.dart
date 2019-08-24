@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list/pages/tasks.dart';
 import 'package:todo_list/widgets/add_task_dialog.dart';
 
@@ -22,13 +23,14 @@ class _AddNewViewState extends State<AddNewView> {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController dayController = TextEditingController();
 
   _save() async {
     Task task = Task();
     if (widget.typeNew) {
       task.taskName = nameController.text;
       task.description = descriptionController.text;
-      task.taskDate = 'Sunday';
+      task.taskDate = dayController.text;
       task.isActive = true;
       DatabaseHelper helper = DatabaseHelper.instance;
       int id = await helper.insert(task);
@@ -37,7 +39,7 @@ class _AddNewViewState extends State<AddNewView> {
       task = widget.task;
       task.taskName = nameController.text;
       task.description = descriptionController.text;
-      task.taskDate = 'Sunday';
+      task.taskDate = dayController.text;
       task.isActive = true;
       DatabaseHelper helper = DatabaseHelper.instance;
       int res = await helper.updateInActive(task);
@@ -78,6 +80,7 @@ class _AddNewViewState extends State<AddNewView> {
       saveButtonText = 'Add the task +';
     } else {
       title = 'Edit';
+      taskDay = widget.task.taskDate;
       saveButtonText = 'Save the task +';
       nameController.text = widget.task.taskName;
       descriptionController.text = widget.task.description;
@@ -116,9 +119,10 @@ class _AddNewViewState extends State<AddNewView> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                       child: TextField(
-                        style: TextStyle(color: Theme
-                            .of(context)
-                            .primaryColorDark),
+                        style: TextStyle(
+                            color: Theme
+                                .of(context)
+                                .primaryColorDark),
                         controller: nameController,
                         decoration: InputDecoration(
                             hintStyle: TextStyle(
@@ -195,7 +199,7 @@ class _AddNewViewState extends State<AddNewView> {
                               fontWeight: FontWeight.normal),
                         ),
                         onPressed: () {
-                          _openAddEntryDialog();
+                          _getDay();
                         },
                       ),
                     ),
@@ -226,7 +230,8 @@ class _AddNewViewState extends State<AddNewView> {
                   ),
                   onPressed: () {
                     (nameController.text.isNotEmpty &&
-                        descriptionController.text.isNotEmpty)
+                        descriptionController.text.isNotEmpty &&
+                        dayController.text.isNotEmpty)
                         ? _save()
                         : print('No Data');
                   },
@@ -242,5 +247,15 @@ class _AddNewViewState extends State<AddNewView> {
       appBar: appbar,
       body: body,
     );
+  }
+
+  _getDay() async {
+    await _openAddEntryDialog();
+    var sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      taskDay = sharedPreferences.getString('Day');
+      dayController.text = sharedPreferences.getString('Day');
+      sharedPreferences.remove('Day');
+    });
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:scroll_behavior/scroll_behavior.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:todo_list/widgets/task_widget.dart';
 
 import '../database_helpers.dart';
@@ -36,6 +37,8 @@ class _TasksViewState extends State<TasksView> {
 
   List<Task> activeTasks, inActiveTasks;
   List<Task> list2, list;
+
+  var crossAxisCount = 1;
 
   _readActiveTasks() async {
     DatabaseHelper helper = DatabaseHelper.instance;
@@ -99,13 +102,11 @@ class _TasksViewState extends State<TasksView> {
     if (res == 1)
       setState(() {
         inActiveTasks.remove(task);
-        print(indexListInActive.length);
 
         indexListInActive.clear();
         for (var i = 0; i < inActiveTasks.length; i++) {
           indexListInActive.add(Element(isSelected: false));
         }
-        print(indexListInActive.length);
 
         clearAll();
 
@@ -183,7 +184,10 @@ class _TasksViewState extends State<TasksView> {
     });
   }
 
-  Widget _getActiveTaskWidget(BuildContext context, int index) {
+  Widget _getActiveTaskWidget(int index) {
+    if (index == activeTasks.length) {
+      return addButton;
+    }
     return new TaskWidget(
       index: index,
       task: activeTasks[index],
@@ -233,7 +237,9 @@ class _TasksViewState extends State<TasksView> {
   Widget tempBody,
       primeBody = Text(""),
       body,
-      bottomSheet;
+      bottomSheet,
+      bottomBar,
+      addButton;
 
   @override
   Widget build(BuildContext context) {
@@ -245,12 +251,51 @@ class _TasksViewState extends State<TasksView> {
       indexListInActive.add(Element(isSelected: false));
     }
 
+    addButton = Card(
+      elevation: 0,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        child: OutlineButton(
+          disabledBorderColor: Colors.black87,
+          disabledTextColor: Colors.black54,
+          borderSide: BorderSide(color: Theme
+              .of(context)
+              .accentColor),
+          textColor: Theme
+              .of(context)
+              .accentColor,
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: EdgeInsets.all(16),
+          child: Text(
+            "Add New +",
+            style: TextStyle(
+                fontSize: 24,
+                fontFamily: 'Tomica',
+                fontWeight: FontWeight.normal),
+          ),
+          onPressed: longPressFlag
+              ? null
+              : () {
+            Navigator.push(
+                context,
+                PageTransition(
+                    type: PageTransitionType.rightToLeft,
+                    child: AddNewView(
+                      typeNew: true,
+                    )));
+          },
+        ),
+      ),
+    );
+
     bottomSheet = Container(
       color: Theme
           .of(context)
           .primaryColorDark,
       child: Padding(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.all(0),
           child: Stack(
             children: <Widget>[
               Column(
@@ -340,6 +385,9 @@ class _TasksViewState extends State<TasksView> {
                       ? Icon(Icons.view_list)
                       : Icon(Icons.view_module);
                   iconSwitch = !iconSwitch;
+                  (crossAxisCount == 1)
+                      ? crossAxisCount = 2
+                      : crossAxisCount = 1;
                 });
               },
             )),
@@ -353,54 +401,8 @@ class _TasksViewState extends State<TasksView> {
       ],
     );
 
-    body = Column(
+    bottomBar = Column(
       children: <Widget>[
-        Expanded(
-            child: Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemBuilder: _getActiveTaskWidget,
-            itemCount: activeTasks.length,
-          ),
-        )),
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            child: OutlineButton(
-              disabledBorderColor: Colors.black87,
-              disabledTextColor: Colors.black54,
-              borderSide: BorderSide(color: Theme
-                  .of(context)
-                  .accentColor),
-              textColor: Theme
-                  .of(context)
-                  .accentColor,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              padding: EdgeInsets.all(16),
-              child: Text(
-                "Add New +",
-                style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Tomica',
-                    fontWeight: FontWeight.normal),
-              ),
-              onPressed: longPressFlag
-                  ? null
-                  : () {
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                              type: PageTransitionType.rightToLeft,
-                              child: AddNewView(
-                                typeNew: true,
-                              )));
-                    },
-            ),
-          ),
-        ),
-        Padding(padding: EdgeInsets.only(top: 10)),
         Visibility(
             visible: !longPressFlag,
             child: Container(
@@ -411,8 +413,8 @@ class _TasksViewState extends State<TasksView> {
               child: InkWell(
                 onTap: () {
                   print("show botttom sheet");
-                  _scaffoldKey.currentState
-                      .showBottomSheet((context) => bottomSheet);
+//                  _scaffoldKey.currentState
+//                      .showBottomSheet((context) => bottomSheet);
                 },
                 child: Padding(
                   padding: EdgeInsets.all(8),
@@ -481,11 +483,40 @@ class _TasksViewState extends State<TasksView> {
         ),
       ],
     );
+    body = Column(
+      children: <Widget>[
+        Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: GridView.count(
+                children: List.generate(
+                    activeTasks.length + 1, _getActiveTaskWidget),
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: (crossAxisCount == 1) ? (5) : 1,
+              ),
+            )),
+//        addButton,
+        Padding(padding: EdgeInsets.only(top: 10)),
+        bottomBar,
+      ],
+    );
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: appbar,
-      body: body,
+      body: SlidingUpPanel(
+        body: Padding(
+          padding: EdgeInsets.only(bottom: 100),
+          child: body,
+        ),
+        panel: bottomSheet,
+        collapsed: bottomBar,
+        maxHeight: MediaQuery
+            .of(context)
+            .size
+            .height,
+        minHeight: 75,
+      ),
     );
   }
 }
