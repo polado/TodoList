@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_list/constants.dart';
 import 'package:todo_list/pages/tasks.dart';
 import 'package:todo_list/widgets/add_task_dialog.dart';
 
@@ -19,7 +20,7 @@ class AddNewView extends StatefulWidget {
 class _AddNewViewState extends State<AddNewView> {
   String title,
       saveButtonText,
-      taskDay = "Tab to choose a day";
+      taskDay = taskDateButtonText;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -52,7 +53,7 @@ class _AddNewViewState extends State<AddNewView> {
   }
 
   void navigate() {
-    Navigator.pushReplacement(
+    Navigator.pop(
         context,
         PageTransition(
             type: PageTransitionType.leftToRight, child: TasksView()));
@@ -93,8 +94,6 @@ class _AddNewViewState extends State<AddNewView> {
 
   @override
   Widget build(BuildContext context) {
-
-
     Widget appbar = AppBar(
       leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -127,12 +126,13 @@ class _AddNewViewState extends State<AddNewView> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
-                      child: TextField(
+                      child: TextFormField(
                         style: TextStyle(
                             color: Theme
                                 .of(context)
                                 .primaryColorDark),
                         controller: nameController,
+                        validator: TaskNameFieldValidator.validate,
                         decoration: InputDecoration(
                             hintStyle: TextStyle(
                               color: Colors.black54,
@@ -161,11 +161,12 @@ class _AddNewViewState extends State<AddNewView> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
-                      child: TextField(
+                      child: TextFormField(
                         controller: descriptionController,
                         minLines: 5,
                         maxLines: 8,
                         style: TextStyle(color: Colors.black),
+                        validator: TaskDescFieldValidator.validate,
                         decoration: InputDecoration(
                             hintStyle: TextStyle(
                               color: Colors.black54,
@@ -269,5 +270,28 @@ class _AddNewViewState extends State<AddNewView> {
       sharedPreferences.remove('Day');
     });
     print('getday ' + dayController.text);
+  }
+}
+
+class TaskNameFieldValidator {
+  static String validate(String value) {
+    if (value.isEmpty) return validateTaskNameEmpty;
+    if (value.length < 5) return validateTaskNameLength;
+    return null;
+  }
+}
+
+class TaskDescFieldValidator {
+  static String validate(String value) {
+    if (value.isEmpty) return validateTaskDescEmpty;
+    if (value.length < 10) return validateTaskDescLength;
+    return null;
+  }
+}
+
+class TaskDateFieldValidator {
+  static String validate(String value) {
+    if (value == taskDateButtonText) return validateTaskDateEmpty;
+    return null;
   }
 }

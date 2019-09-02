@@ -47,7 +47,7 @@ class _TaskWidgetState extends State<TaskWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Padding(
+            Expanded(child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
                 widget.task.taskName,
@@ -61,8 +61,7 @@ class _TaskWidgetState extends State<TaskWidget> {
                       : TextDecoration.lineThrough,
                 ),
               ),
-            ),
-            new Spacer(),
+            )),
             Visibility(
               child: Radio(
                 activeColor: Colors.black,
